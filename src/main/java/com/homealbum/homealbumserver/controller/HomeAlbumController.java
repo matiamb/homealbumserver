@@ -40,7 +40,7 @@ public class HomeAlbumController {
     @PostMapping("/upload")
     public ResponseEntity<String> saveMediaFile(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("hash") String fileHash,
+            @RequestParam("fileHash") String fileHash,
             @RequestParam("folderName") String folderName
     ){
         try{

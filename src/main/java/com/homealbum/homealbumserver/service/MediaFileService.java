@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +35,7 @@ public class MediaFileService implements IMediaFileService{
     }
 
     @Override
-    public void saveFile(MultipartFile file, String hash, String folderName) throws IOException {
+    public void saveFile(MultipartFile file, String fileHash, String folderName) throws IOException {
         Path folderPath = Paths.get(basePath, folderName);
         if(!Files.exists(folderPath)){
             Files.createDirectories(folderPath);
@@ -47,7 +48,7 @@ public class MediaFileService implements IMediaFileService{
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         
         MediaFile mediaFile = MediaFile.builder()
-                .fileHash(hash)
+                .fileHash(fileHash)
                 .fileName(fileName)
                 .folderName(folderName)
                 .mimeType(fileType)
