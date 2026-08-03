@@ -30,7 +30,7 @@ public class MediaFileService implements IMediaFileService{
     
     @Override
     public Boolean checkIfPhotoExists(String fileHash) {
-        return mediaFileRepository.existByHash(fileHash);
+        return mediaFileRepository.existsByFileHash(fileHash);
     }
 
     @Override

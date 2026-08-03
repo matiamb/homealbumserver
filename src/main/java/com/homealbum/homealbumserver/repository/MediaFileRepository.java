@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface MediaFileRepository extends JpaRepository<MediaFile, Long>{
-    boolean existByHash(String hash);
+    boolean existsByFileHash(String fileHash);
 }
