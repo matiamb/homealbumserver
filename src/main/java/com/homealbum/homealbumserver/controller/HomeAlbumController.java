@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,6 +35,10 @@ public class HomeAlbumController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found in the server");
         }
+    }
+    @GetMapping("/ping")
+    public ResponseEntity<String> checkServerConnection(){
+        return ResponseEntity.status(HttpStatus.OK).body("Connection OK");
     }
     @PostMapping("/upload")
     public ResponseEntity<String> saveMediaFile(
