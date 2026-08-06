@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,5 +55,16 @@ public class MediaFileService implements IMediaFileService{
                 .mimeType(fileType)
                 .build();
         mediaFileRepository.save(mediaFile);
+    }
+
+    @Override
+    public void deleteMediaFile(String fileHash) throws IOException {
+        if(mediaFileRepository.existsByFileHash(fileHash)){
+            Optional<MediaFile> media = mediaFileRepository.findByFileHash(fileHash);
+            mediaFileRepository.delete(media.get());
+            Path folderPath = Paths.get(basePath, media.get().getFolderName());
+            Path filePath = folderPath.resolve(media.get().getFileName());
+            Files.deleteIfExists(filePath);
+        }
     }
 }

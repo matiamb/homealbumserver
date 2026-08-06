@@ -9,6 +9,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,5 +53,16 @@ public class HomeAlbumController {
         } catch (IOException e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File could not be uploaded");
         } 
+    }
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteMediaFile(
+    @RequestParam("fileHash") String fileHash
+            ){
+        try{
+            mediaFileService.deleteMediaFile(fileHash);
+            return ResponseEntity.status(HttpStatus.CREATED).body("File deleted successfully");
+        } catch (IOException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File could not be deleted");
+        }
     }
 }
