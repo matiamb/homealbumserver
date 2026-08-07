@@ -51,7 +51,7 @@ public class HomeAlbumController {
             mediaFileService.saveFile(file, fileHash, folderName);
             return ResponseEntity.status(HttpStatus.CREATED).body("File uploaded successfully");
         } catch (IOException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File could not be uploaded");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         } 
     }
     @DeleteMapping("/delete")

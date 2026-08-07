@@ -41,7 +41,10 @@ public class MediaFileService implements IMediaFileService{
         if(!Files.exists(folderPath)){
             Files.createDirectories(folderPath);
         }
-        String fileName = file.getOriginalFilename();
+        if (checkIfPhotoExists(fileHash)){
+            throw new IOException("File already exists");
+        } else {
+            String fileName = file.getOriginalFilename();
         
         Path filePath = folderPath.resolve(fileName);
         String fileType = file.getContentType();
@@ -55,6 +58,7 @@ public class MediaFileService implements IMediaFileService{
                 .mimeType(fileType)
                 .build();
         mediaFileRepository.save(mediaFile);
+        }
     }
 
     @Override
