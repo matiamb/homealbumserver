@@ -8,6 +8,7 @@ import com.homealbum.homealbumserver.model.MediaFile;
 import com.homealbum.homealbumserver.repository.MediaFileRepository;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -36,39 +37,50 @@ public class MediaFileService implements IMediaFileService{
     }
 
     @Override
-    public void saveFile(MultipartFile file, String fileHash, String folderName) throws IOException {
-        Path folderPath = Paths.get(basePath, folderName);
-        if(!Files.exists(folderPath)){
-            Files.createDirectories(folderPath);
-        }
+    public void saveFile(MultipartFile file, String fileHash, String folderName) throws Exception{
+        Path folderPath = Paths.get(basePath, folderName).toAbsolutePath().normalize();
         if (checkIfPhotoExists(fileHash)){
-            throw new IOException("File already exists");
+            throw new Exception("File already exists");
         } else {
             String fileName = file.getOriginalFilename();
-        
-        Path filePath = folderPath.resolve(fileName);
-        String fileType = file.getContentType();
-        
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        
-        MediaFile mediaFile = MediaFile.builder()
-                .fileHash(fileHash)
-                .fileName(fileName)
-                .folderName(folderName)
-                .mimeType(fileType)
-                .build();
-        mediaFileRepository.save(mediaFile);
-        }
+            Path filePath = folderPath.resolve(fileName).normalize();
+            String fileType = file.getContentType();
+            if(!filePath.startsWith(basePath)){
+                throw new InvalidPathException( filePath.toString(), "Invalid folder path");
+            }
+            if(fileType.startsWith("image/") || fileType.startsWith("video/"))                
+                {
+                    if(!Files.exists(folderPath)){
+                        Files.createDirectories(folderPath);
+                    }
+                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                    MediaFile mediaFile = MediaFile.builder()
+                            .fileHash(fileHash)
+                            .fileName(fileName)
+                            .folderName(folderName)
+                            .mimeType(fileType)
+                            .build();
+                    mediaFileRepository.save(mediaFile);
+                } else {
+                    throw new IOException("File not supported");
+                    }
+            }
     }
 
     @Override
     public void deleteMediaFile(String fileHash) throws IOException {
         if(mediaFileRepository.existsByFileHash(fileHash)){
             Optional<MediaFile> media = mediaFileRepository.findByFileHash(fileHash);
-            mediaFileRepository.delete(media.get());
-            Path folderPath = Paths.get(basePath, media.get().getFolderName());
-            Path filePath = folderPath.resolve(media.get().getFileName());
-            Files.deleteIfExists(filePath);
+            Path folderPath = Paths.get(basePath, media.get().getFolderName()).toAbsolutePath().normalize();
+            Path filePath = folderPath.resolve(media.get().getFileName()).normalize();
+            try{
+                Files.deleteIfExists(filePath);
+                mediaFileRepository.delete(media.get());
+            } catch(IOException e){
+                throw new IOException("File could not be deleted");
+            }
+            
         }
     }
 }

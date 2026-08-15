@@ -13,6 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface IMediaFileService {
     Boolean checkIfPhotoExists(String fileHash);
-    void saveFile(MultipartFile file, String hash, String folderName) throws IOException;
+    void saveFile(MultipartFile file, String hash, String folderName) throws Exception;
     void deleteMediaFile(String fileHash) throws IOException;
 }
