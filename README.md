@@ -45,7 +45,7 @@ Then run the generated JAR:
 
 Alternatively, download the JAR from the project's GitHub Releases page and run it directly:
 
-`java -jar homealbumserver-0.1.0.jar`
+`java -jar homealbumserver-v0.1.0-beta.1.jar`
 
 By default, Spring Boot runs on:
 
