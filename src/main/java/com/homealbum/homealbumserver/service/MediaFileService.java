@@ -6,7 +6,9 @@ package com.homealbum.homealbumserver.service;
 
 import com.homealbum.homealbumserver.model.MediaFile;
 import com.homealbum.homealbumserver.repository.MediaFileRepository;
+import dto.DiskSpaceResponse;
 import java.io.IOException;
+import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -81,6 +83,23 @@ public class MediaFileService implements IMediaFileService{
                 throw new IOException("File could not be deleted");
             }
             
+        }
+    }
+
+    @Override
+    public DiskSpaceResponse checkFileSystem() throws IOException {
+        
+        try{
+            Path folderPath = Paths.get(basePath).toAbsolutePath().normalize();
+            FileStore fileStore = Files.getFileStore(folderPath);
+
+            long totalSpace = fileStore.getTotalSpace();
+            long freeSpace = fileStore.getUsableSpace();
+            long usedSpace = totalSpace - freeSpace;
+            DiskSpaceResponse diskSpace = new DiskSpaceResponse(totalSpace, freeSpace, usedSpace);
+            return diskSpace;
+        } catch (IOException e){
+            throw new IOException();
         }
     }
 }
