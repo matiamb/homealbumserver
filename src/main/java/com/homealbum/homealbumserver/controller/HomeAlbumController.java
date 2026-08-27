@@ -5,6 +5,7 @@
 package com.homealbum.homealbumserver.controller;
 
 import com.homealbum.homealbumserver.service.MediaFileService;
+import dto.DiskSpaceResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -64,5 +65,9 @@ public class HomeAlbumController {
         } catch (IOException e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File could not be deleted");
         }
+    }
+    @GetMapping("/diskspace")
+    public DiskSpaceResponse checkFileSystem() throws IOException {
+        return mediaFileService.checkFileSystem();
     }
 }

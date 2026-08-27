@@ -6,7 +6,9 @@ package com.homealbum.homealbumserver.service;
 
 import com.homealbum.homealbumserver.model.MediaFile;
 import com.homealbum.homealbumserver.repository.MediaFileRepository;
+import dto.DiskSpaceResponse;
 import java.io.IOException;
+import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -39,33 +41,34 @@ public class MediaFileService implements IMediaFileService{
     @Override
     public void saveFile(MultipartFile file, String fileHash, String folderName) throws Exception{
         Path folderPath = Paths.get(basePath, folderName).toAbsolutePath().normalize();
+        String fileName = file.getOriginalFilename();
+        Path filePath = folderPath.resolve(fileName).normalize();
+        String fileType = file.getContentType();        
         if (checkIfPhotoExists(fileHash)){
             throw new Exception("File already exists");
-        } else {
-            String fileName = file.getOriginalFilename();
-            Path filePath = folderPath.resolve(fileName).normalize();
-            String fileType = file.getContentType();
-            if(!filePath.startsWith(basePath)){
-                throw new InvalidPathException( filePath.toString(), "Invalid folder path");
-            }
-            if(fileType.startsWith("image/") || fileType.startsWith("video/"))                
-                {
-                    if(!Files.exists(folderPath)){
-                        Files.createDirectories(folderPath);
-                    }
-                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-                    MediaFile mediaFile = MediaFile.builder()
-                            .fileHash(fileHash)
-                            .fileName(fileName)
-                            .folderName(folderName)
-                            .mimeType(fileType)
-                            .build();
-                    mediaFileRepository.save(mediaFile);
-                } else {
-                    throw new IOException("File not supported");
-                    }
-            }
+        } 
+        if(!validateDiskSpace(file)) {
+            throw new IOException("Disk space low");
+        }
+        if (!(fileType.startsWith("image/") || fileType.startsWith("video/"))){
+            throw new IOException("File not supported");
+        }
+        if(!filePath.startsWith(basePath)){
+            throw new InvalidPathException( filePath.toString(), "Invalid folder path");
+        }
+        else {
+                if(!Files.exists(folderPath)){
+                    Files.createDirectories(folderPath);
+                }
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                MediaFile mediaFile = MediaFile.builder()
+                        .fileHash(fileHash)
+                        .fileName(fileName)
+                        .folderName(folderName)
+                        .mimeType(fileType)
+                        .build();
+                mediaFileRepository.save(mediaFile);
+        }
     }
 
     @Override
@@ -81,6 +84,32 @@ public class MediaFileService implements IMediaFileService{
                 throw new IOException("File could not be deleted");
             }
             
+        }
+    }
+
+    @Override
+    public DiskSpaceResponse checkFileSystem() throws IOException {
+        
+        try{
+            Path folderPath = Paths.get(basePath).toAbsolutePath().normalize();
+            FileStore fileStore = Files.getFileStore(folderPath);
+
+            long totalSpace = fileStore.getTotalSpace();
+            long freeSpace = fileStore.getUsableSpace();
+            long usedSpace = totalSpace - freeSpace;
+            DiskSpaceResponse diskSpace = new DiskSpaceResponse(totalSpace, freeSpace, usedSpace);
+            return diskSpace;
+        } catch (IOException e){
+            throw new IOException();
+        }
+    }
+    private boolean validateDiskSpace(MultipartFile file) throws IOException{
+        DiskSpaceResponse diskSpace = checkFileSystem();
+        long fileSize = file.getSize();
+        if (fileSize >= diskSpace.availableSpaceBytes()){
+            return false;
+        } else {
+            return true;
         }
     }
 }
