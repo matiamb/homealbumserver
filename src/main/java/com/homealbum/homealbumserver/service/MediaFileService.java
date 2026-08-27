@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,13 +76,8 @@ public class MediaFileService implements IMediaFileService{
             Optional<MediaFile> media = mediaFileRepository.findByFileHash(fileHash);
             Path folderPath = Paths.get(basePath, media.get().getFolderName()).toAbsolutePath().normalize();
             Path filePath = folderPath.resolve(media.get().getFileName()).normalize();
-            try{
-                Files.deleteIfExists(filePath);
-                mediaFileRepository.delete(media.get());
-            } catch(IOException e){
-                throw new IOException("File could not be deleted");
-            }
-            
+            Files.deleteIfExists(filePath);
+            mediaFileRepository.delete(media.get());       
         }
     }
 
