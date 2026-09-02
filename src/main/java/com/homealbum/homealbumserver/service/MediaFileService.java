@@ -44,7 +44,7 @@ public class MediaFileService implements IMediaFileService{
         Path filePath = folderPath.resolve(fileName).normalize();
         String fileType = file.getContentType();        
         if (checkIfPhotoExists(fileHash)){
-            throw new Exception("File already exists");
+            return;          
         } 
         if(!validateDiskSpace(file)) {
             throw new IOException("Disk space low");
