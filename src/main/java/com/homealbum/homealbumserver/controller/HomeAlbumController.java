@@ -87,7 +87,7 @@ public class HomeAlbumController {
                 String hash = hashList.get(i);
                 mediaFileService.saveFile(file, hash, folderName);
             }
-            return ResponseEntity.status(HttpStatus.CREATED).body("File uploaded successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Files uploaded successfully");
         } catch (Exception e){           
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
