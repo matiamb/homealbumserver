@@ -7,6 +7,7 @@ package com.homealbum.homealbumserver.controller;
 import com.homealbum.homealbumserver.service.MediaFileService;
 import dto.DiskSpaceResponse;
 import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,5 +70,26 @@ public class HomeAlbumController {
     @GetMapping("/diskspace")
     public DiskSpaceResponse checkFileSystem() throws IOException {
         return mediaFileService.checkFileSystem();
+    }
+    @PostMapping("/multipleUpload")
+    public ResponseEntity<String> saveMultipleFiles(
+            @RequestParam("file") List<MultipartFile> fileList,
+            @RequestParam("fileHash") List<String> hashList,
+            @RequestParam("folderName") String folderName
+            
+    ){
+        if(fileList.size() != hashList.size()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is a discrepancy between files and hashes");
+        }
+        try{
+            for(int i = 0; i < fileList.size(); i++){
+                MultipartFile file = fileList.get(i);
+                String hash = hashList.get(i);
+                mediaFileService.saveFile(file, hash, folderName);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body("Files uploaded successfully");
+        } catch (Exception e){           
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }
