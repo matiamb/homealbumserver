@@ -14,6 +14,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,14 +72,14 @@ public class MediaFileService implements IMediaFileService{
     }
 
     @Override
-    public void deleteMediaFile(String fileHash) throws IOException {
-        if(mediaFileRepository.existsByFileHash(fileHash)){
-            Optional<MediaFile> media = mediaFileRepository.findByFileHash(fileHash);
-            Path folderPath = Paths.get(basePath, media.get().getFolderName()).toAbsolutePath().normalize();
-            Path filePath = folderPath.resolve(media.get().getFileName()).normalize();
+    public void deleteMediaFile(List<String> fileHashList) throws IOException {
+        List<MediaFile> mediaList = mediaFileRepository.findAllByFileHashIn(fileHashList);
+        for(MediaFile media : mediaList){
+            Path folderPath = Paths.get(basePath, media.getFolderName()).toAbsolutePath().normalize();
+            Path filePath = folderPath.resolve(media.getFileName()).normalize();
             Files.deleteIfExists(filePath);
-            mediaFileRepository.delete(media.get());       
-        }
+            mediaFileRepository.delete(media);
+        }      
     }
 
     @Override

@@ -58,10 +58,10 @@ public class HomeAlbumController {
     }
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteMediaFile(
-    @RequestParam("fileHash") String fileHash
+    @RequestParam("fileHash") List<String> fileHashList
             ){
         try{
-            mediaFileService.deleteMediaFile(fileHash);
+            mediaFileService.deleteMediaFile(fileHashList);
             return ResponseEntity.status(HttpStatus.CREATED).body("File deleted successfully");
         } catch (IOException e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File could not be deleted");
