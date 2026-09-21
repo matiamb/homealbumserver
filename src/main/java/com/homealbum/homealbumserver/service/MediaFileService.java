@@ -41,13 +41,13 @@ public class MediaFileService implements IMediaFileService{
 
     @Override
     public void saveFile(MultipartFile file, String fileHash, String folderName) throws Exception{
-        Path folderPath = Paths.get(basePath, folderName).toAbsolutePath().normalize();
-        String fileName = file.getOriginalFilename();
-        Path filePath = folderPath.resolve(fileName).normalize();
-        String fileType = file.getContentType();        
         if (checkIfPhotoExists(fileHash)){
             return;          
         } 
+        Path folderPath = Paths.get(basePath, folderName).toAbsolutePath().normalize();
+        String fileName = file.getOriginalFilename();
+        Path filePath = folderPath.resolve(fileName).normalize();
+        String fileType = file.getContentType();
         if(!validateDiskSpace(file)) {
             throw new IOException("Disk space low");
         }
