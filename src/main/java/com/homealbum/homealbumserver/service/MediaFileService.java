@@ -14,7 +14,9 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,13 +41,13 @@ public class MediaFileService implements IMediaFileService{
 
     @Override
     public void saveFile(MultipartFile file, String fileHash, String folderName) throws Exception{
+        if (checkIfPhotoExists(fileHash)){
+            return;          
+        } 
         Path folderPath = Paths.get(basePath, folderName).toAbsolutePath().normalize();
         String fileName = file.getOriginalFilename();
         Path filePath = folderPath.resolve(fileName).normalize();
-        String fileType = file.getContentType();        
-        if (checkIfPhotoExists(fileHash)){
-            throw new Exception("File already exists");
-        } 
+        String fileType = file.getContentType();
         if(!validateDiskSpace(file)) {
             throw new IOException("Disk space low");
         }
@@ -71,14 +73,19 @@ public class MediaFileService implements IMediaFileService{
     }
 
     @Override
-    public void deleteMediaFile(String fileHash) throws IOException {
-        if(mediaFileRepository.existsByFileHash(fileHash)){
-            Optional<MediaFile> media = mediaFileRepository.findByFileHash(fileHash);
-            Path folderPath = Paths.get(basePath, media.get().getFolderName()).toAbsolutePath().normalize();
-            Path filePath = folderPath.resolve(media.get().getFileName()).normalize();
+    public void deleteMediaFile(List<String> fileHashList) throws IOException {
+        List<MediaFile> mediaList = mediaFileRepository.findAllByFileHashIn(fileHashList);
+        for(MediaFile media : mediaList){
+            Path folderPath = Paths.get(basePath, media.getFolderName()).toAbsolutePath().normalize();
+            Path filePath = folderPath.resolve(media.getFileName()).normalize();
             Files.deleteIfExists(filePath);
-            mediaFileRepository.delete(media.get());       
-        }
+            mediaFileRepository.delete(media);
+            try(Stream<Path> files = Files.list(folderPath)){
+                if(files.findAny().isEmpty()){
+                    Files.deleteIfExists(folderPath);
+                }
+            }
+        }      
     }
 
     @Override
