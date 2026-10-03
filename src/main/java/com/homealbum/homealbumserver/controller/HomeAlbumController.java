@@ -6,6 +6,8 @@ package com.homealbum.homealbumserver.controller;
 
 import com.homealbum.homealbumserver.service.MediaFileService;
 import dto.DiskSpaceResponse;
+import dto.SyncRequest;
+import dto.SyncResponse;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -91,5 +94,11 @@ public class HomeAlbumController {
         } catch (Exception e){           
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+    @PostMapping("/sync")
+    public SyncResponse syncMediaFiles(
+            @RequestBody SyncRequest fileHashList
+    ){
+        return mediaFileService.syncMediaFiles(fileHashList);
     }
 }

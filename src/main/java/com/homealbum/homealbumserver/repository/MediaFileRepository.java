@@ -8,6 +8,7 @@ import com.homealbum.homealbumserver.model.MediaFile;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -18,4 +19,6 @@ import org.springframework.stereotype.Repository;
 public interface MediaFileRepository extends JpaRepository<MediaFile, Long>{
     boolean existsByFileHash(String fileHash);
     List<MediaFile> findAllByFileHashIn(List<String> fileHashList);
+    @Query("SELECT fileHash FROM MediaFile WHERE fileHash IN :fileHashList")
+    List<String> findExistingFileHashes(List<String> fileHashList);
 }

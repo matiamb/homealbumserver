@@ -7,6 +7,8 @@ package com.homealbum.homealbumserver.service;
 import com.homealbum.homealbumserver.model.MediaFile;
 import com.homealbum.homealbumserver.repository.MediaFileRepository;
 import dto.DiskSpaceResponse;
+import dto.SyncRequest;
+import dto.SyncResponse;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
@@ -14,6 +16,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -112,5 +115,14 @@ public class MediaFileService implements IMediaFileService{
         } else {
             return true;
         }
+    }
+
+    @Override
+    public SyncResponse syncMediaFiles(SyncRequest fileHashList) {
+        List<String> filesInServer = mediaFileRepository.findExistingFileHashes(fileHashList.fileHashList());
+        List<String> missingFiles = new ArrayList<String>(fileHashList.fileHashList());
+        missingFiles.removeAll(filesInServer);
+        SyncResponse missingFilesResponse = new SyncResponse(missingFiles);
+        return missingFilesResponse;
     }
 }
