@@ -5,6 +5,8 @@
 package com.homealbum.homealbumserver.service;
 
 import dto.DiskSpaceResponse;
+import dto.SyncRequest;
+import dto.SyncResponse;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,4 +20,5 @@ public interface IMediaFileService {
     void saveFile(MultipartFile file, String hash, String folderName) throws Exception;
     void deleteMediaFile(List<String> fileHash) throws IOException;
     DiskSpaceResponse checkFileSystem() throws IOException;
+    SyncResponse syncMediaFiles(SyncRequest fileHashList);
 }
